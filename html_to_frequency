@@ -1,0 +1,79 @@
+import sys, os, re, urllib
+#from urlparse import urlparse, parse_qs, urljoin
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer as lemma
+#----------------------------------------------------
+stop_words = set(stopwords.words('english'))
+valid_link_index = dict()
+bad_links = set()
+crawler_traps = set()
+visited_links = set()
+stopWords = set(stopwords.words('english'))
+#------------------From HTMl to Word Frequency--------
+
+def stripTags(pageContents):
+    startLoc = pageContents.find("<p>")
+    endLoc = pageContents.rfind("<br/>")
+
+    pageContents = pageContents[startLoc:endLoc]
+
+    inside = 0
+    text = ''
+
+    for char in pageContents:
+        if char == '<':
+            inside = 1
+        elif (inside == 1 and char == '>'):
+            inside = 0
+        elif inside == 1:
+            continue
+        else:
+            text += char
+
+    return text
+
+# Given a text string, remove all non-alphanumeric
+# characters (using Unicode definition of alphanumeric).
+
+def stripNonAlphaNum(text):
+    import re
+    s = text.lower()
+    return re.findall(r'[a-z0-9]+', s)
+
+def sortFreqDict(freqdict):
+    aux = [(freqdict[key], key) for key in freqdict]
+    aux.sort()
+    aux.reverse()
+    return aux
+
+def wordListToFreqDict(wordlist):
+    counts = dict()
+    for word in wordlist:
+        if word in counts:
+            counts[word] += 1
+        else:
+            counts[word] = 1
+    return counts
+
+def removeStopwords(wordlist, stopwords):
+    return [w for w in wordlist if w not in stopwords]
+
+def html_to_word_frequency(url):
+
+    response = urllib.urlopen(url)
+    html = response.read()
+    text = stripTags(html).lower()
+    fullwordlist = stripNonAlphaNum(text)
+    wordlist = removeStopwords(fullwordlist, stop_words)
+    dictionary = wordListToFreqDict(wordlist)
+    sorteddict = sortFreqDict(dictionary)
+
+    return sorteddict
+
+
+def main():
+    url = 'http://www.ics.uci.edu/~fowlkes/publications.html'
+    result = html_to_word_frequency(url)
+
+    for s in result:
+        print(str(s))
