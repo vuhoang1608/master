@@ -1,4 +1,4 @@
-import sys, os, re, urllib, nltk, operator
+import sys, os, re, urllib, nltk, operator, math
 from urllib.request import urlopen
 from urllib.parse import urlparse, parse_qs, urljoin
 from nltk.corpus import stopwords, wordnet
@@ -160,33 +160,58 @@ def html_to_word_frequency(url):
 #-------------------------- Calculate tf-idf------------------
 def tf(wordDict):
     tf_score = []
-
     for tempDict in wordDict:
         id = tempDict['docId']
-        n = 0
         total_words = len(tempDict['Frequency_Dict'])
-        for k in tempDict['Frequency_Dict']:
-            temp = {'key' : tempDict['Frequency_Dict'][n][0], 'docID' : id,
+        for n in range(0,total_words):
+            temp = {'key' : tempDict['Frequency_Dict'][n][0], 'docId' : id,
                     'TF-score' : tempDict['Frequency_Dict'][n][1] / total_words}
-            n += 1
+
             tf_score.append(temp)
     return  tf_score
 
 def create_postinglist(wordDict):
-    posting_list = []
+    posting_list = {}
     for tempDict in wordDict:
-        id = tempDict['docID']
-    #still working on it
+        id = tempDict['docId']
+        for n in range(0, len(tempDict['Frequency_Dict'])):
+            if tempDict['Frequency_Dict'][n][0] not in posting_list:
+                posting_list[tempDict['Frequency_Dict'][n][0]] = list()
+            posting_list[tempDict['Frequency_Dict'][n][0]].append(id)
+
+    result = sorted(posting_list.items(), key=operator.itemgetter(0))
+    return result
+#-----------------------------------------------------
+
+# def idf(posting_list):
+#     idf_score = []
+#     tempDict = {}
+#     #count document frequency
+#     count = 0
+#     for key in posting_list.key():
+#         if key in tempDict:
+#             tempDict[key] += 1
+#         else:
+#             tempDict[key] = 1
+#     total_docs = len(valid_link_testing)
+#     for key, value in posting_list:
+#         temp = {'key' : key, 'docId' : value, 'IDF_score' :  }
+
 
 def create_freqDict_id_list():
     freqDict_id_list = []
+    count = 0
     for link, docid in valid_link_testing.items():
         try:
             frequency_dict = html_to_word_frequency(link)
             temp = {'docId' : docid, 'Frequency_Dict': frequency_dict}
             freqDict_id_list.append(temp)
+
         except urllib.error.URLError:
             continue
+        count += 1
+        remain = len(valid_link_testing) - count
+        print("Remaining links: " + str(remain))
     return freqDict_id_list
 
 
@@ -196,20 +221,29 @@ def main():
     print(len(check_link(file)))
     #------------------------------------------------
     freqDict_id_list = create_freqDict_id_list()
-    print(freqDict_id_list)
     #print(tf(freqDict_id_list))
     #print(freqDict_id_list[0]['Frequency_Dict'][0][1] / 3)
-    #testing & printing
-    # url = 'http://www.ics.uci.edu/~theory/269/s01.html'
-    # result = html_to_word_frequency(url)
-    # print(tf(result))
-    # for s in result:
-    #     print(str(s))
 
     #------------------
 
-    output_file1 = open("tf_score.txt", "w")
-    for s in tf(freqDict_id_list):
-        output_file1.write(str(s) + "\n")
-    output_file1.close()
-    main()
+    # output_file1 = open("tf_score.txt", "w")
+    # for s in tf(freqDict_id_list):
+    #     output_file1.write(str(s) + "\n")
+    # output_file1.close()
+
+    output_file2 = open("posting_list.txt", "w")
+    for s in create_postinglist(freqDict_id_list):
+        output_file2.write(str(s) + "\n")
+    output_file2.close()
+
+    # output_file3 = open("idf_score.txt", "w")
+    # for s in idf(create_postinglist(freqDict_id_list)):
+    #     output_file3.write(str(s) + "\n")
+    # output_file3.close()
+
+    #Print all valid links
+    # output_file = open('valid_links_index.txt', 'w')
+    # for link in valid_link_index:
+    #     output_file.write(str(link) + " : " + str(valid_link_index[link]) + '\n')
+    # output_file.close()
+main()
