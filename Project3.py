@@ -1,249 +1,321 @@
-import sys, os, re, urllib, nltk, operator, math
-from urllib.request import urlopen
-from urllib.parse import urlparse, parse_qs, urljoin
-from nltk.corpus import stopwords, wordnet
-from bs4 import BeautifulSoup as bs
-from nltk.stem import WordNetLemmatizer
+#!/usr/bin/python3
+# @Vu Tran
+""" Team 55
+    Vu Tran - 48894667
+    Anas ??
+    Hoang ??
+    CS 121 - Project 3  """
 
-valid_link_testing = {'http://www.ics.uci.edu/~magda' : '46/309',
-'http://www.ironwood.ics.uci.edu/wiki:navigation?rev=1376434009&vecdo=print' :'4/215',
-'http://www.cml.ics.uci.edu/aiml/page/12' : '4/214',
-'http://www.ics.uci.edu/~irus//css/98/mini-tutorial/tsld018.htm' : '4/217',
-'http://www.sli.ics.uci.edu/Site/UserCreation' : '4/211',
-'http: // www.ics.uci.edu / ~pattis / ICS - 21 / lectures / inheritancei / index.html' : '74/184',
-'http://www.ics.uci.edu/~dock/manuals/oechem/api/node939.html' : '20/407'}
+""" Objective: 
+    Build INDEX table from 37,497 files
+    Parsing for keywords
+    """
 
-#----------------------------------------------------
-stop_words = set(stopwords.words('english'))
-valid_link_index = dict() #contains valid links and its index
-bad_links = set()
-crawler_traps = set()
-lemma = WordNetLemmatizer()
+""" Data structure:
+    INDEX is a dict= {keyword:(set of (docID,frequency)), ...}, works as main database
+    docID = foldNum * 1000 + location file number of that folder, ex: 34/156 => docID = 34156
+    """
 
-#------------------Check valid links and save to dictionary-------
+""" Algorithm:
+    For each docID do
+        IF a "keyword" found not existing in the INDEX
+            adding it to INDEX[keys]
+            adding docID to the set of that "keywords" in INDEX
+        ELSE
+            adding docID to the set of that "keywords" in INDEX
+    Store INDEX database on a file
 
-#use is_valid function from project 2
-def is_valid(url):
-    '''
-    Function returns True or False based on whether the url has to be
-    downloaded or not.
-    Robot rules and duplication rules are checked separately.
-    This is a great place to filter out crawler traps.
-    '''
-    global bad_links  # sets
-    global crawler_traps  # sets
+    """
 
-    if len(url) > 100:
-        crawler_traps.add(url)
-        return False
+""" TODO Improving Performance:
+        1. Applying only to html content (vincent)
+        2. Filtering stopword   (vincent)
+        3. Applying compression methods for saving INDEX (Hoang)
+        4. Applying Stemming and lemmatization (Anas)
+        5. Function to calculate df-idf from docID (Hoang)
+        6. Implement ranking single keyword query (Anas)
+        7. Implement ranking PHRASE query (Anas or Hoang, should be the same person doing task 6)
+        8. Implement parallel processing for performance (optional, vincent)
+        9. Implement GUI (optional, Anas)
+        10.Design (vincent)  
+        11.Managing the project (vincent)
 
-    # parse url string to url object
-    parsed = urlparse(url)
-    # print url
+    Reference: https://nlp.stanford.edu/IR-book/html/htmledition/contents-1.html
+    """
+"""" Answer query:
+    """
 
-    if parsed.scheme not in set(["http", "https"]):
-        bad_links.add(url)
-        return False
+""" Reference: https://nlp.stanford.edu/IR-book/html/htmledition/contents-1.html
+             : https://arxiv.org/pdf/1208.6109.pdf => wordlength < 20 ?
+    """
 
-    # look for calendar in path (trap)
-    elif re.search(r'^.*calendar.*$', parsed.path):
-        crawler_traps.add(url)
-        return False
+import os, sys, math, time
+import re
+from collections import Counter
+import nltk
+from nltk.corpus import stopwords  # Get the common english stopwords
+from bs4 import BeautifulSoup, SoupStrainer  # Get content from html files
+from pathlib import Path
+from nltk.stem import PorterStemmer  # https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
-    # another trap
-    elif re.search(r'^.*ganglia.*$', parsed.path):
-        crawler_traps.add(url)
-        return False
-
-    # regx for Repeating Directories:
-    elif re.search(r'^.*?(/.+?/).*?\1.*$|^.*?/(.+?/)\2.*$', parsed.path):
-        crawler_traps.add(url)
-        return False
-
-    try:
-        if ".ics.uci.edu" in parsed.hostname and not re.match(
-                ".*\.(css|js|bmp|gif|jpe?g|ico" + "|png|tiff?|mid|mp2|mp3|mp4" \
-                + "|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf" \
-                + "|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub|dll|cnf|tgz|sha1" \
-                + "|thmx|mso|arff|rtf|jar|csv" \
-                + "|rm|smil|wmv|swf|wma|zip|rar|gz|pdf)$", parsed.path.lower()):
-            return True
-        else:
-            crawler_traps.add(url)
-            return False
-
-    except TypeError:
-        print("TypeError for ", parsed)
-        return False
-
-    finally:
-        bad_links.add(url)
-
-#This function check the link in bookkeeping and save the valid links (with index) into a dictionary
-def check_link(file):
-    if not os.path.isfile(file):
-        print("File path {} does not exist. Exiting...".format(file))
-        sys.exit()
-    index = set()
-    with open(file) as fp:
-        for line in fp:
-            index = re.findall(r'\S+', line)
-
-            if index[1].startswith('www'):
-                index[1] = 'http://' + index[1]
-            else:
-                index[1] = 'http://www.' + index[1]
-
-            if is_valid(index[1]):
-                valid_link_index[index[1]] = index[0]
-    return valid_link_index
-
-#------------------From HTMl to Word Frequency--------
-# Given a text string, remove all non-alphanumeric
-# characters (using Unicode definition of alphanumeric).
-
-#use the treebank_tag and return the correct word form
-#Refer: https://stackoverflow.com/questions/15586721/wordnet-lemmatization-and-pos-tagging-in-python
-def get_wordnet_pos(treebank_tag):
-    if treebank_tag.startswith('J'):
-        return wordnet.ADJ
-    elif treebank_tag.startswith('V'):
-        return wordnet.VERB
-    elif treebank_tag.startswith('N'):
-        return wordnet.NOUN
-    elif treebank_tag.startswith('R'):
-        return wordnet.ADV
-    else:
-        return wordnet.NOUN
-
-def stripNonAlphaNum(text):
-    import re
-    s = text.lower()
-    result = re.findall(r'[a-z0-9]+',s)
-    result = nltk.pos_tag(result)
-    lemma_list = list()
-    for w in result:
-        lemma_list.append(lemma.lemmatize(w[0],get_wordnet_pos(w[1])))
-    return lemma_list
-
-def sortFreqDict(freqdict):
-    a = sorted(freqdict.items(), key=operator.itemgetter(0))
-    result = sorted(a, key=operator.itemgetter(1), reverse=True)
-    return result
-
-def wordListToFreqDict(wordlist):
-    counts = dict()
-    for word in wordlist:
-        if word in counts:
-            counts[word] += 1
-        else:
-            counts[word] = 1
-
-    return counts
-
-def removeStopwords(wordlist, stopwords):
-    return [w for w in wordlist if w not in stopwords]
-
-def html_to_word_frequency(url):
-
-    response = urlopen(url)
-    html = response.read()
-    soup = bs(html, 'html.parser')
-    text = soup.text
-    fullwordlist = stripNonAlphaNum(text)
-    wordlist = removeStopwords(fullwordlist, stop_words)
-    dictionary = wordListToFreqDict(wordlist)
-    sorteddict = sortFreqDict(dictionary)
-
-    return sorteddict
-
-#-------------------------- Calculate tf-idf------------------
-def tf(wordDict):
-    tf_score = []
-    for tempDict in wordDict:
-        id = tempDict['docId']
-        total_words = len(tempDict['Frequency_Dict'])
-        for n in range(0,total_words):
-            temp = {'key' : tempDict['Frequency_Dict'][n][0], 'docId' : id,
-                    'TF-score' : tempDict['Frequency_Dict'][n][1] / total_words}
-
-            tf_score.append(temp)
-    return  tf_score
-
-def create_postinglist(wordDict):
-    posting_list = {}
-    for tempDict in wordDict:
-        id = tempDict['docId']
-        for n in range(0, len(tempDict['Frequency_Dict'])):
-            if tempDict['Frequency_Dict'][n][0] not in posting_list:
-                posting_list[tempDict['Frequency_Dict'][n][0]] = list()
-            posting_list[tempDict['Frequency_Dict'][n][0]].append(id)
-
-    result = sorted(posting_list.items(), key=operator.itemgetter(0))
-    return result
-#-----------------------------------------------------
-
-# def idf(posting_list):
-#     idf_score = []
-#     tempDict = {}
-#     #count document frequency
-#     count = 0
-#     for key in posting_list.key():
-#         if key in tempDict:
-#             tempDict[key] += 1
-#         else:
-#             tempDict[key] = 1
-#     total_docs = len(valid_link_testing)
-#     for key, value in posting_list:
-#         temp = {'key' : key, 'docId' : value, 'IDF_score' :  }
+INDEX = dict()  # INDEX = {keyword: {set of (docID, tf-idf score)}}
+posting_list = dict() # = { 'keyword' : (doc1,doc2, ....) }
+docLocation = dict()  # = { "docID" : path}
+NUM_OF_FOLDERS = 75  # 0-74, 0-499
+NUM_OF_FILES_PER_FOLDER = 500  # 500        #0-74, 0-499
+MAXWORDLENGTH = 20
+MINWORDLENGTH = 2
+TOTAL_NUM_OF_DOC = 37497 #37497 #total documents
 
 
-def create_freqDict_id_list():
-    freqDict_id_list = []
-    count = 0
-    for link, docid in valid_link_testing.items():
+def buildINDEX(rootFolder):
+    # 0-74, 0-499
+    # Build docID - filename mapping
+    for i in range(0, NUM_OF_FOLDERS):
+        for j in range(0, NUM_OF_FILES_PER_FOLDER):
+            filePath = rootFolder + "/" + str(i) + "/" + str(j)  # WEBPAGES_RAW/0/12
+            docID = i * 1000 + j
+            docLocation[str(docID)] = filePath
+    # print (docLocation)
+
+    # Traverse each file docID and processing
+    for docID in docLocation:
         try:
-            frequency_dict = html_to_word_frequency(link)
-            temp = {'docId' : docid, 'Frequency_Dict': frequency_dict}
-            freqDict_id_list.append(temp)
-
-        except urllib.error.URLError:
+            buildPostingList(docID)
+            print("processing " + docID)
+        except:
             continue
+
+    return None
+
+#Hoang modified this fuction to print the posting list without frequency at the beginning
+def buildPostingList(docID):
+    tokenList = getTokensList(docLocation[docID])
+    for keyword in tokenList:
+        # todo here
+        if keyword not in posting_list:
+            tmpSet = set()
+            tmpSet.add(docID)
+            posting_list[keyword] = tmpSet  # posting_list = {keyword : (doc1, doc2, ...)}
+        else:
+            posting_list[keyword].add(docID)
+    return None
+
+#Hoang added code ----------------START-------------------------
+def build_list_with_IDF_score(tokenList):
+    count = 0
+    for keyword in tokenList:
+        tokenList[keyword] = math.log(TOTAL_NUM_OF_DOC/len(tokenList[keyword]),10)
+        print("Calculating idf keyword: " + keyword + " - left: " + str(len(tokenList)-count))
         count += 1
-        remain = len(valid_link_testing) - count
-        print("Remaining links: " + str(remain))
-    return freqDict_id_list
+    return tokenList
+
+def updating_INDEX():
+
+    # 0-74, 0-499
+    # Build docID - filename mapping
+    # 0-74, 0-499
+    # Build docID - filename mapping
+
+    idf_score_list = build_list_with_IDF_score(posting_list)
+
+    # Traverse each file docID and processing
+    for docID in docLocation:
+        try:
+            processOneDoc(docID, idf_score_list)
+            print("Populating complete INDEX " + docID)
+        except:
+            continue
+    return None
 
 
-def main():
-    global valid_link_index
-    file = 'bookkeeping.tsv'
-    print(len(check_link(file)))
-    #------------------------------------------------
-    freqDict_id_list = create_freqDict_id_list()
-    #print(tf(freqDict_id_list))
-    #print(freqDict_id_list[0]['Frequency_Dict'][0][1] / 3)
+def processOneDoc(docID, idf_score_list):
+    dictList = buildDict(docLocation[docID])  #dictList is a dict of (keyword : freq)
+    dictList_length = len(dictList)
+    for keyword in dictList:
+        # todo here
+        tmpTuple = (docID, int((dictList[keyword]/dictList_length * idf_score_list[keyword])*10000)) #Calculate tf-idf score
+        if keyword not in INDEX:
+            tmpSet = set()
+            tmpSet.add(tmpTuple)
+            INDEX[keyword] = tmpSet  # INDEX = {keyword: {set of (docID, if-tdf score)}}
+        else:
+            INDEX[keyword].add(tmpTuple)
+#Hoang added code -------------------------------------- END-------------------------
 
-    #------------------
+def runQuery(searchKeyword, numOfDocs):
+    if searchKeyword in INDEX:
+        tmpSet = INDEX[searchKeyword]  # = {(docID, freq), ...}
+        sortedList = sorted(tmpSet, key=lambda item: item[1], reverse=True)
+        # print ("Query result of " + str(searchKeyword))
+        # for i in sortedList[0:numOfDocs]:
+        #     print(i)
+        if numOfDocs < len(sortedList):
+            queryResult = sortedList[0:numOfDocs]
+        else:
+            queryResult = sortedList
+    else:
+        queryResult = set()
+    return queryResult  # Return a list of (docID,freq)
 
-    # output_file1 = open("tf_score.txt", "w")
-    # for s in tf(freqDict_id_list):
-    #     output_file1.write(str(s) + "\n")
-    # output_file1.close()
 
-    output_file2 = open("posting_list.txt", "w")
-    for s in create_postinglist(freqDict_id_list):
-        output_file2.write(str(s) + "\n")
-    output_file2.close()
+def locateTSV(docID, fileName):  # For milestone 1, I doing with tsv file, todo with json library later on
+    docDirNum, docFileNum = divmod(docID, 1000)
+    docTag = str(docDirNum) + "/" + str(docFileNum)
+    # print(docTag)
+    foundURL = "URL Not Found"
+    try:
+        with open(fileName, "r") as f:  # todo: multi-threading
+            for line in f:
+                pattern = line.split('\t', maxsplit=2)
+                for pat in pattern:
+                    # print(pat)
+                    if pat == docTag and len(pattern) > 1:
+                        foundURL = pattern[1]
+    except:
+        foundURL = "Error-Finding-URL"
+    return foundURL
 
-    # output_file3 = open("idf_score.txt", "w")
-    # for s in idf(create_postinglist(freqDict_id_list)):
-    #     output_file3.write(str(s) + "\n")
-    # output_file3.close()
 
-    #Print all valid links
-    # output_file = open('valid_links_index.txt', 'w')
-    # for link in valid_link_index:
-    #     output_file.write(str(link) + " : " + str(valid_link_index[link]) + '\n')
-    # output_file.close()
-main()
+def writeINDEXToFile(fileName):
+    with open(fileName, "w") as f:
+        for keyword in INDEX:
+            f.write(keyword)
+            f.write('\t')
+            f.write(str(INDEX[keyword]))
+            f.write('\n')
+    return None
+
+
+def reportMilestone1():
+    # Build & store INDEX database
+    # Need to change / to \ if using WINDOW
+    if sys.platform.startswith('win32'):
+        slash = "\\"
+    else:
+        slash = "/"
+
+    rootFolderPath = os.getcwd() + slash + "WEBPAGES_RAW"
+    TSVFile = rootFolderPath + slash + "bookkeeping.tsv"
+    indexFilePath = rootFolderPath + slash + "INDEX"
+    buildINDEX(rootFolderPath)
+    updating_INDEX() #Hoang added code
+    writeINDEXToFile(indexFilePath)
+
+    # Query list
+    queryList = ['informatics', 'mondego', 'irvine', 'artificial', 'computer']
+    stemList(queryList)
+    print(queryList)
+    queryReturn = list()
+    numOfReturn = 10
+    for query in queryList:
+        print("Query result of " + str(query) + " :")
+        result = runQuery(query, numOfReturn)
+        for docIDItem in result:
+            foundURL = locateTSV(int(docIDItem[0]), TSVFile)
+            queryReturn.append((docIDItem[0], foundURL))
+            docDirNum, docFileNum = divmod(int(docIDItem[0]), 1000)
+            docTag = str(docDirNum) + "/" + str(docFileNum)
+            print("\tDocID " + str(docTag) + " : " + str(foundURL))
+        # print(queryReturn)
+    return None
+
+
+##################### Text Processing #################################################################
+def getTokensList(fileName):
+    """ Convert file name text contents into sorted list of tokens in alphabetically
+        Reading lines in file: O(n)
+        Sorting token list: O(nlgn)
+        Thus, complexity: O(nlgn)    """
+    tokensList = []
+    pattern = re.compile('[a-z0-9]+', re.IGNORECASE)
+    stopWords = set(stopwords.words('english'))  # Init here for the performance
+
+    # https://beautiful-soup-4.readthedocs.io/en/latest/index.html?highlight=SoupStrainer
+    # https://www.w3schools.com/html/html_intro.asp
+    parsingTags = ['p', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'title']
+    parsingOnly = SoupStrainer(parsingTags)
+
+    with open(fileName, "r") as f:  # todo: multi-threading
+        soupObj = BeautifulSoup(f, features="html.parser", parse_only=parsingOnly)  # improving performance
+        content = soupObj.get_text()
+        tokenLine = pattern.findall(content.lower())
+        # print(tokenLine)
+        tokensList = filterPattern(tokenLine, stopWords)
+        # print(tokensList)
+
+    return sorted(tokensList)  # to ensure later sorted(dictList) return descending by value and ascending by key
+
+
+def buildDict(fileName):
+    """ Returns a list of pairs (key,value)
+        [("keys" -> "number of appearance of the key")] and sorted by the highest appearance
+        Complexity: O(nlgn)    """
+    tokenList = getTokensList(fileName)
+    dictList = Counter()  # faster
+    for token in tokenList:
+        dictList[token] += 1
+    return dictList
+
+
+def filterPattern(tokenList, stopWords):  # Applying all possible rules to filtering out non-sense keywords
+    filteredList = []
+    Porter = PorterStemmer()
+    for pattern in tokenList:
+        selectPattern = True
+        if (re.compile('^[0-9].*', re.IGNORECASE)).match(str(pattern)) \
+                or (re.compile('^[0-9]+', re.IGNORECASE)).match(str(pattern)) \
+                or (pattern in stopWords) \
+                or (len(str(pattern)) > MAXWORDLENGTH) \
+                or (len(str(pattern)) <= MINWORDLENGTH):
+            selectPattern = False
+
+        if selectPattern:
+            stemPattern = Porter.stem(pattern)  # stemming it before adding
+            filteredList.append(stemPattern)
+            # filteredList.append(pattern)
+
+    return filteredList
+
+
+def stemList(listOfTokens):  # Applying stemming rules for each keywords
+    Porter = PorterStemmer()
+    for i in range(len(listOfTokens)):
+        # applying the stemmer of each item in the list
+        listOfTokens[i] = Porter.stem(listOfTokens[i])
+    return None
+
+def Run():
+    reportMilestone1()
+
+##################################################
+# for testing/debug performance only
+# https://www.clips.uantwerpen.be/tutorials/python-performance-optimization
+def profile(function, *args, **kwargs):
+    """ Returns performance statistics (as a string) for the given function.
+    """
+
+    def _run():
+        function(*args, **kwargs)
+
+    import cProfile as profile
+    import pstats
+    import os
+    import sys;
+    sys.modules['__main__'].__profile_run__ = _run
+    id = function.__name__ + '()'
+    profile.run('__profile_run__()', id)
+    p = pstats.Stats(id)
+    p.stream = open(id, 'w')
+    p.sort_stats('time').print_stats(20)
+    p.stream.close()
+    s = open(id).read()
+    os.remove(id)
+    return s
+
+
+###################################################
+
+# Main()
+if __name__ == '__main__':
+    print(profile(Run))
