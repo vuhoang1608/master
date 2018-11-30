@@ -49,7 +49,7 @@
              : https://arxiv.org/pdf/1208.6109.pdf => wordlength < 20 ?
     """
 
-import os, sys, math, time
+import os, sys, math, json, io
 import re
 from collections import Counter
 import nltk
@@ -59,9 +59,9 @@ from pathlib import Path
 from nltk.stem import PorterStemmer  # https://www.datacamp.com/community/tutorials/stemming-lemmatization-python
 
 INDEX = dict()  # INDEX = {keyword: {set of (docID, tf-idf score)}}
-posting_list = dict() # = { 'keyword' : (doc1,doc2, ....) }
+posting_list = dict()  # = { 'keyword' : (doc1,doc2, ....) }
 docLocation = dict()  # = { "docID" : path}
-NUM_OF_FOLDERS = 75  # 0-74, 0-499
+NUM_OF_FOLDERS = 75 # 0-74, 0-499
 NUM_OF_FILES_PER_FOLDER = 500  # 500        #0-74, 0-499
 MAXWORDLENGTH = 20
 MINWORDLENGTH = 2
@@ -82,7 +82,7 @@ def buildINDEX(rootFolder):
     for docID in docLocation:
         try:
             buildPostingList(docID)
-            print("processing " + docID)
+            print("processing docID: " + docID)
         except:
             continue
 
@@ -106,24 +106,18 @@ def build_list_with_IDF_score(tokenList):
     count = 0
     for keyword in tokenList:
         tokenList[keyword] = math.log(TOTAL_NUM_OF_DOC/len(tokenList[keyword]),10)
-        print("Calculating idf keyword: " + keyword + " - left: " + str(len(tokenList)-count))
+        print("Calculating idf keyword: " + keyword + " - keys left: " + str(len(tokenList)-count))
         count += 1
     return tokenList
 
 def updating_INDEX():
-
-    # 0-74, 0-499
-    # Build docID - filename mapping
-    # 0-74, 0-499
-    # Build docID - filename mapping
-
     idf_score_list = build_list_with_IDF_score(posting_list)
 
     # Traverse each file docID and processing
     for docID in docLocation:
         try:
             processOneDoc(docID, idf_score_list)
-            print("Populating complete INDEX " + docID)
+            print("Populating complete INDEX file: " + docID)
         except:
             continue
     return None
@@ -132,15 +126,17 @@ def updating_INDEX():
 def processOneDoc(docID, idf_score_list):
     dictList = buildDict(docLocation[docID])  #dictList is a dict of (keyword : freq)
     dictList_length = len(dictList)
+
+    title_list = buildDict_title(docLocation[docID])
     for keyword in dictList:
         # todo here
-        tmpTuple = (docID, int((dictList[keyword]/dictList_length * idf_score_list[keyword])*10000)) #Calculate tf-idf score
+        tmpTuple = (docID, int((dictList[keyword] / dictList_length * idf_score_list[keyword]) * 10000), title_list[keyword])  # Calculate tf-idf score
         if keyword not in INDEX:
-            tmpSet = set()
-            tmpSet.add(tmpTuple)
+            tmpSet = list()
+            tmpSet.append(tmpTuple)
             INDEX[keyword] = tmpSet  # INDEX = {keyword: {set of (docID, if-tdf score)}}
         else:
-            INDEX[keyword].add(tmpTuple)
+            INDEX[keyword].append(tmpTuple)
 #Hoang added code -------------------------------------- END-------------------------
 
 def runQuery(searchKeyword, numOfDocs):
@@ -186,6 +182,14 @@ def writeINDEXToFile(fileName):
             f.write('\n')
     return None
 
+#Hoang added code ---------------START------------------
+def writeJSONFile(fileName):
+    with open(fileName,'w', encoding='utf8') as file:
+        json.dump(INDEX, file, indent=1, sort_keys=True,
+                      separators=(',', ': '), ensure_ascii=False)
+
+
+# Hoang added code ---------------END------------------
 
 def reportMilestone1():
     # Build & store INDEX database
@@ -201,6 +205,7 @@ def reportMilestone1():
     buildINDEX(rootFolderPath)
     updating_INDEX() #Hoang added code
     writeINDEXToFile(indexFilePath)
+    writeJSONFile(rootFolderPath + slash + "INDEX1.json") #Hoang added code
 
     # Query list
     queryList = ['informatics', 'mondego', 'irvine', 'artificial', 'computer']
@@ -233,11 +238,10 @@ def getTokensList(fileName):
 
     # https://beautiful-soup-4.readthedocs.io/en/latest/index.html?highlight=SoupStrainer
     # https://www.w3schools.com/html/html_intro.asp
-    parsingTags = ['p', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'title']
-    parsingOnly = SoupStrainer(parsingTags)
+    #parsingTags = ['b','p', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'title']
 
     with open(fileName, "r") as f:  # todo: multi-threading
-        soupObj = BeautifulSoup(f, features="html.parser", parse_only=parsingOnly)  # improving performance
+        soupObj = BeautifulSoup(f, features="html.parser") #parse every tag in a html
         content = soupObj.get_text()
         tokenLine = pattern.findall(content.lower())
         # print(tokenLine)
@@ -245,7 +249,6 @@ def getTokensList(fileName):
         # print(tokensList)
 
     return sorted(tokensList)  # to ensure later sorted(dictList) return descending by value and ascending by key
-
 
 def buildDict(fileName):
     """ Returns a list of pairs (key,value)
@@ -256,6 +259,35 @@ def buildDict(fileName):
     for token in tokenList:
         dictList[token] += 1
     return dictList
+
+#Hoang added code -------------------------- START ---------------------------
+def getTokensList_title(fileName): #only parse title, meta data and header from html
+    tokensList = []
+    pattern = re.compile('[a-z0-9]+', re.IGNORECASE)
+    stopWords = set(stopwords.words('english'))  # Init here for the performance
+
+    # https://beautiful-soup-4.readthedocs.io/en/latest/index.html?highlight=SoupStrainer
+    # https://www.w3schools.com/html/html_intro.asp
+    parsingTags = ['title', 'meta', 'b','h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+    parsingOnly = SoupStrainer(parsingTags)
+
+    with open(fileName, "r") as f:  # todo: multi-threading
+        soupObj = BeautifulSoup(f, features="html.parser", parse_only=parsingOnly)  # improving performance
+        content = soupObj.get_text()
+        tokenLine = pattern.findall(content.lower())
+        tokensList = filterPattern(tokenLine, stopWords)
+
+    return sorted(tokensList)
+
+def buildDict_title(fileName):
+    tokenList = getTokensList_title(fileName)
+    dictList = Counter()  # faster
+    for token in tokenList:
+        dictList[token] += 1
+    return dictList
+#Hoang added code -------------------------- END ---------------------------
+
+
 
 
 def filterPattern(tokenList, stopWords):  # Applying all possible rules to filtering out non-sense keywords
