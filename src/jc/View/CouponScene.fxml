@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jc.View.CouponScene">
+   <children>
+      <StackPane prefHeight="450.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <BorderPane id="couponScene" prefHeight="450.0" prefWidth="800.0" style="-fx-background-color: #e1e6ef;" stylesheets="@Theme.css">
+               <right>
+                  <VBox prefHeight="271.0" prefWidth="195.0" spacing="15.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <JFXButton fx:id="changeCity" onAction="#changeCity" style="-fx-background-color: #1587d0;" text="Change City" textFill="WHITE">
+                           <font>
+                              <Font name="Georgia" size="18.0" />
+                           </font>
+                        </JFXButton>
+                        <JFXButton fx:id="back" layoutX="10.0" layoutY="10.0" onAction="#back" prefHeight="22.0" prefWidth="120.0" style="-fx-background-color: #1587d0;" text="Back" textFill="WHITE">
+                           <font>
+                              <Font name="Georgia" size="18.0" />
+                           </font>
+                        </JFXButton>
+                        <JFXButton fx:id="quit" layoutX="10.0" layoutY="58.0" onAction="#quit" prefHeight="22.0" prefWidth="120.0" style="-fx-background-color: #1587d0;" text="Quit" textFill="WHITE">
+                           <font>
+                              <Font name="Georgia" size="18.0" />
+                           </font>
+                        </JFXButton>
+                     </children>
+                  </VBox>
+               </right>
+               <top>
+                  <GridPane BorderPane.alignment="CENTER">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="262.0" minWidth="10.0" prefWidth="38.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="622.0" minWidth="10.0" prefWidth="551.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="225.0" minWidth="10.0" prefWidth="191.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Hyperlink fx:id="createSignIn" onAction="#createSignIn" text="Create Account / Sign In" GridPane.columnIndex="2">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Hyperlink>
+                        <Label fx:id="title" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="722.0" text="You have choosen" textFill="#5a96ff" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font name="Copperplate Gothic Light" size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </GridPane>
+               </top>
+               <center>
+                  <GridPane prefHeight="360.0" prefWidth="550.0" BorderPane.alignment="CENTER">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="195.0" minWidth="0.0" prefWidth="15.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="493.0" minWidth="10.0" prefWidth="486.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints maxHeight="168.0" minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="240.0" minHeight="10.0" prefHeight="240.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <BorderPane id="coupons" minHeight="-Infinity" minWidth="-Infinity" prefHeight="321.0" prefWidth="572.0" style="-fx-background-color: #ffffff;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <center>
+                              <GridPane prefHeight="312.0" prefWidth="571.0" BorderPane.alignment="CENTER">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="196.0" minWidth="9.0" prefWidth="17.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="445.0" minWidth="10.0" prefWidth="203.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="382.0" minWidth="10.0" prefWidth="212.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="382.0" minWidth="10.0" prefWidth="159.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints maxHeight="182.0" minHeight="0.0" prefHeight="157.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="125.0" minHeight="0.0" prefHeight="108.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="104.0" minHeight="10.0" prefHeight="66.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <ImageView fitHeight="71.0" fitWidth="142.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../../Images/coupon6.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="97.0" fitWidth="208.0" layoutX="20.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2">
+                                       <image>
+                                          <Image url="@../../Images/coupon3.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="139.0" fitWidth="142.0" layoutX="239.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3">
+                                       <image>
+                                          <Image url="@../../Images/coupon2.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="93.0" fitWidth="191.0" layoutX="448.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../../Images/Coupon4.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="81.0" fitWidth="203.0" layoutX="20.0" layoutY="147.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../../Images/coupon5.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="72.0" fitWidth="194.0" layoutX="230.0" layoutY="207.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1">
+                                       <image>
+                                          <Image url="@../../Images/coupon1.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </GridPane>
+                           </center>
+                        </BorderPane>
+                     </children>
+                  </GridPane>
+               </center>
+            </BorderPane>
+         </children>
+      </StackPane>
+   </children>
+</AnchorPane>
