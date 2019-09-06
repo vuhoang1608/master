@@ -1,0 +1,104 @@
+/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
+
+#startScene{
+    -fx-background-image: url("background.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+    -fx-min-width: 200px;
+    -fx-min-width: 100px;
+}
+#cities{
+	-fx-opacity: 0.75; 
+}
+
+#signInScene{
+	-fx-background-image: url("background.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+}
+#createFirst{
+	-fx-font: 13px System;
+	-fx-text-fill: #2E86C1; 
+}
+#createLast{
+	-fx-font: 13px System;
+	-fx-text-fill: #2E86C1; 
+}
+#createUsername{
+	-fx-font: 13px System;
+	-fx-text-fill: #2E86C1; 
+}
+#signUpPass{
+	-fx-font: 13px System;
+	-fx-text-fill: #2E86C1; 
+}
+#signInUsername{
+	-fx-font: 13px System;
+	-fx-text-fill: #2E86C1; 
+}
+#SignInPass{
+	-fx-font: 13px System;
+	-fx-text-fill: #2E86C1; 
+}
+
+#accountAccess{
+	-fx-opacity: 0.90; 
+}
+
+#cityScene{
+	-fx-background-image: url("background.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+}
+
+#washes{
+	-fx-opacity: 0.90; 
+	-fx-text-fill: #2E86C1;
+}
+
+#reviewScene{
+	-fx-background-image: url("background.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+}
+#reviewView{
+	-fx-opacity: 0.90; 
+}
+
+#moreInformation{
+	-fx-background-image: url("background.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+}
+
+#moreInformationText{
+	-fx-font: 18px Georgia;
+	-fx-opacity: 0.90; 
+	-fx-text-fill: #2E86C1;
+}
+
+#couponScene{
+	-fx-background-image: url("background.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+}
+#coupons{
+	-fx-opacity: 0.80;
+	-fx-effect: dropshadow( three-pass-box , rgba(48,124,175,0.9) , 5, 0.0 , 0 , 1 );
+}
+
+#writeScene{
+	-fx-background-image: url("background.jpg");
+    -fx-background-repeat: stretch;   
+    -fx-background-size: cover;
+}
+#reviewBody{
+	-fx-opacity: 0.90;
+	-fx-font: 18px System;
+	-fx-text-fill: #2E86C1; 
+}
+#rating{
+	-fx-font: 18px System;
+	-fx-text-fill: #2E86C1; 
+}
+

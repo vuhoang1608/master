@@ -1,0 +1,1 @@
+jfxrt.jar is javaFX as a jar , used to make the jar not require javaFX for the end user

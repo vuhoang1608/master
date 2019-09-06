@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jc.View.ReviewScene">
+   <children>
+      <StackPane prefHeight="450.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <BorderPane id="reviewScene" fx:id="reviewScene" prefHeight="450.0" prefWidth="800.0" style="-fx-background-color: #e1e6ef;" stylesheets="@Theme.css">
+               <center>
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="50.0" prefWidth="499.0" text="Rating / Review" textAlignment="CENTER" textFill="#6a92ff">
+                           <padding>
+                              <Insets bottom="5.0" left="80.0" right="5.0" top="15.0" />
+                           </padding>
+                           <font>
+                              <Font name="Georgia" size="24.0" />
+                           </font>
+                        </Label>
+                        <HBox prefHeight="264.0" prefWidth="800.0" spacing="50.0">
+                           <children>
+                              <ListView fx:id="reviewView" focusTraversable="false" prefHeight="255.0" prefWidth="446.0" />
+                              <VBox prefHeight="245.0" prefWidth="199.0" spacing="15.0">
+                                 <children>
+                                    <Label fx:id="logInWarn" text="Log in to write a review" underline="true">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="-15.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <JFXButton fx:id="review" onAction="#review" prefHeight="40.0" prefWidth="139.0" ripplerFill="WHITE" style="-fx-background-color: #1587d0;" text="Write Review" textFill="#6b6b6b">
+                                       <font>
+                                          <Font name="Georgia" size="18.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <JFXButton fx:id="changeCity" layoutX="10.0" layoutY="10.0" onAction="#changeCity" prefHeight="42.0" prefWidth="139.0" ripplerFill="WHITE" style="-fx-background-color: #1587d0;" text="Change City" textFill="WHITE">
+                                       <font>
+                                          <Font name="Georgia" size="18.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <JFXButton fx:id="back" layoutX="10.0" layoutY="77.0" onAction="#back" prefHeight="39.0" prefWidth="140.0" ripplerFill="WHITE" style="-fx-background-color: #1587d0;" text="Back" textFill="WHITE">
+                                       <font>
+                                          <Font name="Georgia" size="18.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <JFXButton fx:id="quit2" layoutX="10.0" layoutY="140.0" onAction="#quit2" prefHeight="42.0" prefWidth="141.0" ripplerFill="WHITE" style="-fx-background-color: #1587d0;" text="Quit" textFill="WHITE">
+                                       <font>
+                                          <Font name="Georgia" size="18.0" />
+                                       </font>
+                                    </JFXButton>
+                                 </children>
+                              </VBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="15.0" left="110.0" />
+                           </padding>
+                        </HBox>
+                        <HBox prefHeight="55.0" prefWidth="800.0" spacing="50.0">
+                           <children>
+                              <HBox prefHeight="33.0" prefWidth="387.0" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </center>
+               <top>
+                  <GridPane BorderPane.alignment="CENTER">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="395.0" minWidth="10.0" prefWidth="49.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="766.0" minWidth="10.0" prefWidth="549.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="766.0" minWidth="10.0" prefWidth="210.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label fx:id="title" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="765.0" text="You have choosen" textFill="#5a96ff" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font name="Copperplate Gothic Light" size="24.0" />
+                           </font>
+                        </Label>
+                        <Hyperlink fx:id="createSignIn" onAction="#createSignIn" text="Create Account / Sign In" GridPane.columnIndex="2">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Hyperlink>
+                     </children>
+                  </GridPane>
+               </top>
+            </BorderPane>
+         </children>
+      </StackPane>
+   </children>
+</AnchorPane>

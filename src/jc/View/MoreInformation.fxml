@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jc.View.MoreInformationScene">
+   <children>
+      <StackPane prefHeight="450.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <BorderPane id="moreInformation" prefHeight="450.0" prefWidth="800.0" stylesheets="@Theme.css">
+               <center>
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <HBox prefHeight="300.0" prefWidth="800.0" spacing="50.0">
+                           <children>
+                              <TextArea fx:id="moreInformationText" editable="false" prefHeight="249.0" prefWidth="485.0" styleClass="textarea" stylesheets="@Theme.css" />
+                              <VBox prefHeight="271.0" prefWidth="195.0" spacing="15.0" translateX="-20.0">
+                                 <children>
+                                    <JFXButton fx:id="changeCity" onAction="#changeCity" prefHeight="37.0" prefWidth="141.0" style="-fx-background-color: #1587d0;" text="Change City" textFill="WHITE">
+                                       <font>
+                                          <Font name="Georgia" size="18.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <JFXButton fx:id="back" layoutX="10.0" layoutY="10.0" onAction="#back" prefHeight="37.0" prefWidth="141.0" style="-fx-background-color: #1587d0;" text="Back" textFill="WHITE">
+                                       <font>
+                                          <Font name="Georgia" size="18.0" />
+                                       </font>
+                                    </JFXButton>
+                                    <JFXButton fx:id="quit" layoutX="10.0" layoutY="67.0" onAction="#quit" prefHeight="37.0" prefWidth="141.0" style="-fx-background-color: #1587d0;" text="Quit" textFill="WHITE">
+                                       <font>
+                                          <Font name="Georgia" size="18.0" />
+                                       </font>
+                                    </JFXButton>
+                                 </children>
+                              </VBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="15.0" left="110.0" />
+                           </padding>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </center>
+               <top>
+                  <GridPane BorderPane.alignment="CENTER">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="259.0" minWidth="0.0" prefWidth="81.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="617.0" minWidth="10.0" prefWidth="500.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="251.0" minWidth="10.0" prefWidth="189.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="91.0" minWidth="10.0" prefWidth="30.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Hyperlink fx:id="createSignIn" onAction="#createSignIn" text="Create Account / Sign In" GridPane.columnIndex="2">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Hyperlink>
+                        <Label fx:id="title" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="722.0" text="You have choosen" textFill="#5a96ff" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font name="Copperplate Gothic Light" size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </GridPane>
+               </top>
+            </BorderPane>
+         </children>
+      </StackPane>
+   </children>
+</AnchorPane>
